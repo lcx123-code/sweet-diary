@@ -43,6 +43,7 @@ export default function WriteScreen() {
   const user = useAuthStore((s) => s.user)
   const coupleId = useCoupleStore((s) => s.coupleId)
   const selectedMood = useMoodStore((s) => s.selectedId)
+  const moods = useMoodStore((s) => s.moods)
   const selectMood = useMoodStore((s) => s.selectMood)
   const fetchMoods = useMoodStore((s) => s.fetchMoods)
   const createEntry = useDiaryStore((s) => s.createEntry)
@@ -159,6 +160,7 @@ export default function WriteScreen() {
 
   const today = new Date()
   const dateStr = `${today.getMonth() + 1}.${today.getDate()}`
+  const selectedMoodEmoji = moods.find((mood) => mood.id === selectedMood)?.emoji
 
   return (
     <KeyboardAvoidingView
@@ -242,7 +244,6 @@ export default function WriteScreen() {
               selectedId={selectedMood}
               onSelect={(id) => {
                 selectMood(id)
-                setShowMoodPicker(false)
               }}
             />
           </View>
@@ -264,10 +265,12 @@ export default function WriteScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.toolBtn}
+          style={[styles.toolBtn, selectedMood && styles.toolBtnActive]}
           onPress={() => setShowMoodPicker(!showMoodPicker)}
         >
-          <Text style={styles.moodBtnText}>😊</Text>
+          <Text style={[styles.moodBtnText, selectedMood && styles.moodBtnTextActive]}>
+            {selectedMoodEmoji ?? '😊'}
+          </Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -393,7 +396,14 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.separator,
   },
+  toolBtnActive: {
+    backgroundColor: colors.accentLight,
+    borderColor: colors.accent,
+  },
   moodBtnText: {
     fontSize: 20,
+  },
+  moodBtnTextActive: {
+    fontSize: 24,
   },
 })
