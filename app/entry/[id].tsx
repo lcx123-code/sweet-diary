@@ -102,7 +102,7 @@ export default function EntryDetailScreen() {
         <View style={styles.authorDot}>
           <Text style={styles.authorDotText}>{avatarLetter}</Text>
         </View>
-        <Text style={styles.authorName}>{entry.author_name ?? '用户'}</Text>
+        <Text style={styles.authorName}>{entry.author_name ?? '记录者'}</Text>
         <Text style={styles.authorTime}>· {time}</Text>
         {entry.mood && (
           <Text style={styles.moodEmoji}>{entry.mood.emoji}</Text>

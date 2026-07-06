@@ -32,6 +32,22 @@ function groupByDate(entries: DiaryEntryWithMood[]): DiaryWithEntries[] {
     }))
 }
 
+async function attachAuthorNames(entries: DiaryEntryWithMood[]) {
+  const userIds = Array.from(new Set(entries.map((entry) => entry.user_id)))
+  if (userIds.length === 0) return
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, name')
+    .in('id', userIds)
+
+  const nameMap = new Map((profiles ?? []).map((profile) => [profile.id, profile.name]))
+
+  entries.forEach((entry) => {
+    entry.author_name = nameMap.get(entry.user_id) || '记录者'
+  })
+}
+
 export const useDiaryStore = create<DiaryState>((set) => ({
   timeline: [],
   isLoading: false,
@@ -62,10 +78,7 @@ export const useDiaryStore = create<DiaryState>((set) => ({
     const diaryIds = new Set(diaries?.map((d) => d.id) ?? [])
     const filtered = data.filter((e) => diaryIds.has(e.diary_id)) as unknown as DiaryEntryWithMood[]
 
-    // 暂用 user_id 前 8 位作为显示名
-    filtered.forEach((e) => {
-      e.author_name = e.user_id.slice(0, 8)
-    })
+    await attachAuthorNames(filtered)
 
     // 批量查图片数量 + 首张图片 URL
     const entryIds = filtered.map((e) => e.id)
@@ -125,7 +138,9 @@ export const useDiaryStore = create<DiaryState>((set) => ({
       .single()
 
     if (error || !data) return null
-    return data as unknown as DiaryEntryWithMood
+    const entry = data as unknown as DiaryEntryWithMood
+    await attachAuthorNames([entry])
+    return entry
   },
 
   createEntry: async (coupleId, userId, content, moodId, milestoneType?) => {
