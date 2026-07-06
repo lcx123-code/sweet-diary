@@ -2,7 +2,10 @@
   <view class="title serif">回忆</view>
   <view class="subtitle">你们一起写下的日子</view>
 
-  <block wx:for="{{years}}" wx:key="year">
+  <view wx:if="{{loading}}" class="empty">正在整理回忆...</view>
+  <view wx:elif="{{years.length === 0}}" class="empty">还没有记录，从一句话开始也很好。</view>
+
+  <block wx:else wx:for="{{years}}" wx:key="year">
     <view class="year serif">{{item.year}}</view>
     <block wx:for="{{item.months}}" wx:for-item="month" wx:key="month">
       <view class="month serif">{{month.month}}</view>

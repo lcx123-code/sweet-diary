@@ -1,10 +1,21 @@
 Page({
   data: {
-    years: []
+    years: [],
+    loading: true
   },
 
-  onShow() {
-    const entries = getApp().globalData.entries
+  async onShow() {
+    const app = getApp()
+    if (!app.globalData.user) {
+      wx.navigateTo({ url: '/pages/login/login' })
+      return
+    }
+
+    this.setData({ loading: true })
+    await app.loadCurrentUserData().catch((error) => {
+      wx.showToast({ title: error.message || '加载失败', icon: 'none' })
+    })
+    const entries = app.globalData.entries || []
     const yearMap = {}
 
     entries.forEach((entry) => {
@@ -21,7 +32,7 @@ Page({
       }))
     }))
 
-    this.setData({ years })
+    this.setData({ years, loading: false })
   },
 
   goEntry(event) {

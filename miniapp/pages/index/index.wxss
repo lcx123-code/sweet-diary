@@ -2,6 +2,22 @@
   margin-bottom: 56rpx;
 }
 
+.loading,
+.empty-couple {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 28rpx;
+  text-align: center;
+}
+
+.loading {
+  color: #A39D96;
+  font-size: 28rpx;
+}
+
 .names {
   margin-bottom: 18rpx;
   font-size: 48rpx;

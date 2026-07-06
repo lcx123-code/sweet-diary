@@ -23,7 +23,7 @@
 
   <view class="type-toggle">
     <text class="faint">记录类型</text>
-    <text class="type-value">{{recordTypes[typeIndex]}}</text>
+    <text class="type-value">{{recordTypes[typeIndex].label}}</text>
   </view>
 
   <view class="type-row">
@@ -33,23 +33,23 @@
       class="type-pill {{typeIndex === index ? 'active' : ''}}"
       data-index="{{index}}"
       bindtap="chooseType"
-    >{{item}}</text>
+    >{{item.label}}</text>
   </view>
 
   <view class="mood-row">
     <text
       wx:for="{{moods}}"
-      wx:key="*this"
-      class="mood {{mood === item ? 'mood-active' : ''}}"
+      wx:key="id"
+      class="mood {{moodId === item.id ? 'mood-active' : ''}}"
       data-mood="{{item}}"
       bindtap="chooseMood"
-    >{{item}}</text>
+    >{{item.emoji}}</text>
   </view>
 
   <view wx:if="{{savingMessage}}" class="saving">{{savingMessage}}</view>
 
   <view class="bottom-tools">
     <view class="tool" bindtap="chooseImage">📷</view>
-    <view class="tool selected">{{mood || '😊'}}</view>
+    <view class="tool selected">{{moodEmoji || '😊'}}</view>
   </view>
 </view>

@@ -1,23 +1,37 @@
-const recordTypes = ['普通记录', '纪念日', '旅行', '生日', '特别时刻']
-const moods = ['😊', '🌿', '🍲', '✨', '🌧️', '☕']
+const supabase = require('../../utils/supabase')
+
+const recordTypes = [
+  { label: '普通记录', value: null },
+  { label: '纪念日', value: 'anniversary' },
+  { label: '旅行', value: 'first_trip' },
+  { label: '生日', value: 'birthday' },
+  { label: '特别时刻', value: 'other' }
+]
 
 Page({
   data: {
     content: '',
     dateLabel: '',
     recordTypes,
-    moods,
+    moods: [],
     typeIndex: 0,
-    mood: '',
+    moodId: '',
+    moodEmoji: '',
     images: [],
     saving: false,
     savingMessage: ''
   },
 
-  onLoad() {
+  onShow() {
+    const app = getApp()
+    if (!app.globalData.user) {
+      wx.navigateTo({ url: '/pages/login/login' })
+      return
+    }
     const now = new Date()
     this.setData({
-      dateLabel: `${now.getMonth() + 1}.${now.getDate()}`
+      dateLabel: `${now.getMonth() + 1}.${now.getDate()}`,
+      moods: app.globalData.moods || []
     })
   },
 
@@ -31,7 +45,11 @@ Page({
 
   chooseMood(event) {
     const mood = event.currentTarget.dataset.mood
-    this.setData({ mood: this.data.mood === mood ? '' : mood })
+    const active = this.data.moodId === mood.id
+    this.setData({
+      moodId: active ? '' : mood.id,
+      moodEmoji: active ? '' : mood.emoji
+    })
   },
 
   chooseImage() {
@@ -51,20 +69,54 @@ Page({
     this.setData({ images })
   },
 
-  save() {
+  async save() {
+    const app = getApp()
+    const user = app.globalData.user
+    const coupleId = app.globalData.coupleId
+
+    if (!user) {
+      wx.navigateTo({ url: '/pages/login/login' })
+      return
+    }
+    if (!coupleId) {
+      wx.showToast({ title: '请先绑定日记', icon: 'none' })
+      return
+    }
     if (!this.data.content.trim()) {
       wx.showToast({ title: '写点什么吧', icon: 'none' })
       return
     }
 
     this.setData({ saving: true, savingMessage: '正在保存文字...' })
-    setTimeout(() => {
-      this.setData({ savingMessage: this.data.images.length ? '正在保存照片...' : '正在更新日记...' })
-    }, 450)
-    setTimeout(() => {
+
+    try {
+      const today = new Date().toISOString().slice(0, 10)
+      let diary = await supabase.findDiary(coupleId, today)
+      if (!diary) {
+        diary = await supabase.createDiary(coupleId, today)
+      }
+
+      await supabase.createEntry({
+        diary_id: diary.id,
+        user_id: user.id,
+        mood_id: this.data.moodId || null,
+        content: this.data.content.trim(),
+        status: 'published',
+        milestone_type: recordTypes[this.data.typeIndex].value
+      })
+
+      if (this.data.images.length > 0) {
+        this.setData({ savingMessage: '照片上传会在下一版接入...' })
+      }
+
+      this.setData({ savingMessage: '正在更新日记...' })
+      await app.loadEntries()
       wx.showToast({ title: '已保存', icon: 'success' })
-      this.setData({ saving: false, savingMessage: '' })
+      this.setData({ content: '', images: [], saving: false, savingMessage: '' })
       wx.switchTab({ url: '/pages/index/index' })
-    }, 900)
+    } catch (error) {
+      wx.showToast({ title: error.message || '保存失败', icon: 'none' })
+      this.setData({ saving: false, savingMessage: '' })
+    }
   }
 })

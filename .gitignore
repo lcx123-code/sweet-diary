@@ -38,6 +38,9 @@ sweet-diary-home.png
 # Supabase local metadata
 supabase/.temp/
 
+# WeChat DevTools local settings
+miniapp/project.private.config.json
+
 # typescript
 *.tsbuildinfo
 

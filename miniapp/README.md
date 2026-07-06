@@ -12,7 +12,20 @@ The first version focuses on preserving the current paper-editorial UI:
 - Multi-image collage styling
 - Mood and milestone UI
 
-It currently uses local mock data in `app.js` so the interface can be reviewed immediately in WeChat DevTools. Supabase REST configuration lives in `utils/supabase.js` and can be wired into the pages later.
+It uses the existing Supabase project through REST APIs in `utils/supabase.js`.
+
+Implemented now:
+
+- Email/password login through Supabase Auth
+- Session token storage in WeChat local storage
+- Loading profile, couple, partner, moods, diaries, entries, and entry images
+- Creating text journal entries in the existing `diaries` / `diary_entries` tables
+
+Still pending:
+
+- Real WeChat `openid` login
+- Image upload from Mini Program to Supabase Storage
+- Invite-code create/join actions
 
 ## Open In WeChat DevTools
 
@@ -34,4 +47,4 @@ Configure request domains in the WeChat Mini Program console:
 https://ialmdeggizzddhkcqsfl.supabase.co
 ```
 
-For real login, the recommended next step is to add a backend or cloud function for WeChat `openid` login. The current email-login UI is only a placeholder for the MVP interface.
+For a better Mini Program login experience, the recommended next step is to add a backend or cloud function for WeChat `openid` login. Email login is already wired for the current MVP.

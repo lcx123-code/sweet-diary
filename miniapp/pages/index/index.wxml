@@ -1,4 +1,13 @@
 <view class="page home-page">
+  <view wx:if="{{loading}}" class="loading">正在翻开日记...</view>
+
+  <view wx:elif="{{!hasCouple}}" class="empty-couple">
+    <view class="names serif">{{userName}}</view>
+    <view class="subtitle">邀请一个人，一起写这本日记</view>
+    <view class="primary-button" bindtap="goJoin">输入邀请码</view>
+  </view>
+
+  <block wx:else>
   <view class="cover">
     <view class="names serif">{{userName}} &amp; {{partnerName}}</view>
     <view class="days serif"><text>{{daysTogether}}</text> 天</view>
@@ -32,5 +41,6 @@
       <view wx:if="{{item.type !== '普通记录'}}" class="pill">{{item.type}}</view>
       <view class="body-text memory-text">{{item.content}}</view>
     </view>
+  </block>
   </block>
 </view>

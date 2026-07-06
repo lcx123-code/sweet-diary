@@ -10,6 +10,14 @@
   font-size: 32rpx;
 }
 
+.empty {
+  margin-top: 160rpx;
+  color: #A39D96;
+  text-align: center;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
 .year {
   margin: 44rpx 0 28rpx;
   font-size: 76rpx;
