@@ -90,7 +90,7 @@ export default function HomeScreen() {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.centerContent}>
         <Text style={styles.greeting}>{user?.name ?? '你的日记'}</Text>
-        <Text style={styles.centerSubtitle}>还没有绑定伴侣</Text>
+        <Text style={styles.centerSubtitle}>邀请一个人，一起写这本日记</Text>
         <View style={styles.inviteSection}>
           <TouchableOpacity style={styles.accentButton} onPress={handleCreateCouple}>
             <Text style={styles.accentButtonText}>生成邀请码</Text>

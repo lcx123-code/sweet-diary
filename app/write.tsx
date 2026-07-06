@@ -36,8 +36,10 @@ export default function WriteScreen() {
   const { diaryId } = useLocalSearchParams<{ diaryId?: string }>()
   const [content, setContent] = useState('')
   const [saving, setSaving] = useState(false)
+  const [savingMessage, setSavingMessage] = useState<string | null>(null)
   const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([])
   const [showMoodPicker, setShowMoodPicker] = useState(false)
+  const [showTypePicker, setShowTypePicker] = useState(false)
   const [milestoneType, setMilestoneType] = useState<string | null>(null)
 
   const user = useAuthStore((s) => s.user)
@@ -127,6 +129,7 @@ export default function WriteScreen() {
     }
 
     setSaving(true)
+    setSavingMessage('正在保存文字...')
 
     const { id: entryId, error } = await createEntry(
       coupleId,
@@ -137,11 +140,13 @@ export default function WriteScreen() {
     )
     if (error || !entryId) {
       setSaving(false)
+      setSavingMessage(null)
       Alert.alert('保存失败', error ?? '未知错误')
       return
     }
 
     for (const asset of images) {
+      setSavingMessage(`正在保存照片 ${images.indexOf(asset) + 1}/${images.length}...`)
       const imageId = await uploadImage(asset, user.id)
       if (imageId) {
         const { error: linkError } = await supabase.from('diary_entry_images').insert({
@@ -155,7 +160,9 @@ export default function WriteScreen() {
       }
     }
 
+    setSavingMessage('正在更新日记...')
     await fetchTimeline(coupleId)
+    setSavingMessage(null)
     setSaving(false)
     router.back()
   }
@@ -163,6 +170,7 @@ export default function WriteScreen() {
   const today = new Date()
   const dateStr = `${today.getMonth() + 1}.${today.getDate()}`
   const selectedMoodEmoji = moods.find((mood) => mood.id === selectedMood)?.emoji
+  const selectedRecordType = recordTypes.find((type) => type.value === milestoneType) ?? recordTypes[0]
 
   return (
     <KeyboardAvoidingView
@@ -221,23 +229,41 @@ export default function WriteScreen() {
         {/* 分隔线 */}
         <View style={styles.divider} />
 
-        <View style={styles.typeSection}>
-          {recordTypes.map((type) => {
-            const active = milestoneType === type.value
-            return (
-              <TouchableOpacity
-                key={type.label}
-                style={[styles.typePill, active && styles.typePillActive]}
-                onPress={() => setMilestoneType(type.value)}
-                activeOpacity={0.75}
-              >
-                <Text style={[styles.typeText, active && styles.typeTextActive]}>
-                  {type.label}
-                </Text>
-              </TouchableOpacity>
-            )
-          })}
-        </View>
+        <TouchableOpacity
+          style={styles.typeToggle}
+          onPress={() => setShowTypePicker(!showTypePicker)}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.typeToggleLabel}>记录类型</Text>
+          <Text style={styles.typeToggleValue}>{selectedRecordType.label}</Text>
+        </TouchableOpacity>
+
+        {showTypePicker && (
+          <View style={styles.typeSection}>
+            {recordTypes.map((type) => {
+              const active = milestoneType === type.value
+              return (
+                <TouchableOpacity
+                  key={type.label}
+                  style={[styles.typePill, active && styles.typePillActive]}
+                  onPress={() => {
+                    setMilestoneType(type.value)
+                    setShowTypePicker(false)
+                  }}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.typeText, active && styles.typeTextActive]}>
+                    {type.label}
+                  </Text>
+                </TouchableOpacity>
+              )
+            })}
+          </View>
+        )}
+
+        {savingMessage && (
+          <Text style={styles.savingStatus}>{savingMessage}</Text>
+        )}
 
         {/* 心情选择器（点击 😊 后展开） */}
         {showMoodPicker && (
@@ -330,6 +356,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.separator,
     marginVertical: spacing.sm,
   },
+  typeToggle: {
+    marginHorizontal: spacing.xs,
+    marginBottom: spacing.xs,
+    paddingVertical: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.separator,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  typeToggleLabel: {
+    fontSize: fontSizes.caption,
+    color: colors.textMuted,
+  },
+  typeToggleValue: {
+    fontSize: fontSizes.caption,
+    color: colors.accent,
+    fontWeight: '600',
+  },
   typeSection: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -353,6 +399,12 @@ const styles = StyleSheet.create({
   typeTextActive: {
     color: colors.accent,
     fontWeight: '600',
+  },
+  savingStatus: {
+    paddingHorizontal: spacing.xs,
+    paddingTop: spacing.xs,
+    fontSize: fontSizes.caption,
+    color: colors.textMuted,
   },
   imageRow: {
     flexDirection: 'row',

@@ -10,57 +10,32 @@ import {
 import { useLocalSearchParams, router } from 'expo-router'
 import { ImageCollage } from '../../src/components/ImageCollage'
 import { useDiaryStore } from '../../src/store/diaryStore'
-import { supabase } from '../../src/lib/supabase'
 import { colors, spacing, fontSizes, fonts, lineHeights } from '../../src/theme'
-import type { DiaryEntryWithMood, Image as ImageType } from '../../src/lib/supabase-types'
+import type { DiaryEntryWithMood } from '../../src/lib/supabase-types'
 
 export default function EntryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const [entry, setEntry] = useState<DiaryEntryWithMood | null>(null)
-  const [images, setImages] = useState<{ id: string; uri: string; width?: number; height?: number }[]>([])
+  const [dayEntries, setDayEntries] = useState<DiaryEntryWithMood[]>([])
   const [loading, setLoading] = useState(true)
   const getEntry = useDiaryStore((s) => s.getEntry)
+  const getDiaryEntries = useDiaryStore((s) => s.getDiaryEntries)
 
   useEffect(() => {
     if (!id) return
     setLoading(true)
 
-    Promise.all([
-      getEntry(id),
-      fetchImages(id),
-    ]).then(([entryData]) => {
+    getEntry(id).then(async (entryData) => {
       setEntry(entryData)
+      if (entryData?.diary_id) {
+        const entries = await getDiaryEntries(entryData.diary_id)
+        setDayEntries(entries.length > 0 ? entries : [entryData])
+      } else {
+        setDayEntries([])
+      }
       setLoading(false)
     })
   }, [id])
-
-  const fetchImages = async (entryId: string) => {
-    const { data, error } = await supabase
-      .from('diary_entry_images')
-      .select('image_id, images(bucket, path, width, height)')
-      .eq('entry_id', entryId)
-
-    if (error || !data) return
-
-    const urls: { id: string; uri: string; width?: number; height?: number }[] = []
-    for (const row of data) {
-      const img = Array.isArray(row.images) ? row.images[0] : row.images as unknown as ImageType
-      if (!img?.bucket || !img?.path) continue
-
-      const { data: urlData } = supabase.storage
-        .from(img.bucket)
-        .getPublicUrl(img.path)
-
-      urls.push({
-        id: row.image_id,
-        uri: urlData.publicUrl,
-        width: img.width ?? undefined,
-        height: img.height ?? undefined,
-      })
-    }
-
-    setImages(urls)
-  }
 
   if (loading) {
     return (
@@ -78,14 +53,8 @@ export default function EntryDetailScreen() {
     )
   }
 
-  const time = new Date(entry.created_at).toLocaleTimeString('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-
   const date = new Date(entry.created_at)
   const dateStr = `${date.getMonth() + 1}.${date.getDate()}`
-  const avatarLetter = (entry.author_name ?? '?').charAt(0)
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -97,38 +66,49 @@ export default function EntryDetailScreen() {
       {/* 日期 */}
       <Text style={styles.dateHeader}>{dateStr}</Text>
 
-      {/* 作者标识—小圆点 */}
-      <View style={styles.authorRow}>
-        <View style={styles.authorDot}>
-          <Text style={styles.authorDotText}>{avatarLetter}</Text>
+      <Text style={styles.dayHint}>
+        {dayEntries.length > 1 ? `这一天写了 ${dayEntries.length} 段` : '这一天的一段记录'}
+      </Text>
+
+      {dayEntries.map((item) => (
+        <View key={item.id} style={styles.entryBlock}>
+          <View style={styles.authorRow}>
+            <View style={styles.authorDot}>
+              <Text style={styles.authorDotText}>{(item.author_name ?? '?').charAt(0)}</Text>
+            </View>
+            <Text style={styles.authorName}>{item.author_name ?? '记录者'}</Text>
+            <Text style={styles.authorTime}>· {formatTime(item.created_at)}</Text>
+            {item.mood && (
+              <Text style={styles.moodEmoji}>{item.mood.emoji}</Text>
+            )}
+          </View>
+
+          {item.content && (
+            <Text style={styles.contentText}>{item.content}</Text>
+          )}
+
+          {item.images && item.images.length > 0 && (
+            <ImageCollage images={item.images} style={styles.imageSection} />
+          )}
+
+          {item.milestone_type && (
+            <View style={styles.milestoneBadge}>
+              <Text style={styles.milestoneBadgeText}>
+                {milestoneLabel(item.milestone_type)}
+              </Text>
+            </View>
+          )}
         </View>
-        <Text style={styles.authorName}>{entry.author_name ?? '记录者'}</Text>
-        <Text style={styles.authorTime}>· {time}</Text>
-        {entry.mood && (
-          <Text style={styles.moodEmoji}>{entry.mood.emoji}</Text>
-        )}
-      </View>
-
-      {/* 正文 */}
-      {entry.content && (
-        <Text style={styles.contentText}>{entry.content}</Text>
-      )}
-
-      {/* 图片 */}
-      {images.length > 0 && (
-        <ImageCollage images={images} style={styles.imageSection} />
-      )}
-
-      {/* 里程碑标记 */}
-      {entry.milestone_type && (
-        <View style={styles.milestoneBadge}>
-          <Text style={styles.milestoneBadgeText}>
-            {milestoneLabel(entry.milestone_type)}
-          </Text>
-        </View>
-      )}
+      ))}
     </ScrollView>
   )
+}
+
+function formatTime(value: string): string {
+  return new Date(value).toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 function milestoneLabel(type: string): string {
@@ -175,6 +155,15 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.xs,
     paddingLeft: spacing.xs,
+  },
+  dayHint: {
+    fontSize: fontSizes.caption,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
+    paddingLeft: spacing.xs,
+  },
+  entryBlock: {
+    marginBottom: spacing.md,
   },
   authorRow: {
     flexDirection: 'row',

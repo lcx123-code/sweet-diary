@@ -8,6 +8,7 @@ interface DiaryState {
 
   fetchTimeline: (coupleId: string) => Promise<void>
   getEntry: (entryId: string) => Promise<DiaryEntryWithMood | null>
+  getDiaryEntries: (diaryId: string) => Promise<DiaryEntryWithMood[]>
   createEntry: (
     coupleId: string,
     userId: string,
@@ -48,6 +49,56 @@ async function attachAuthorNames(entries: DiaryEntryWithMood[]) {
   })
 }
 
+async function attachEntryImages(entries: DiaryEntryWithMood[]) {
+  const entryIds = entries.map((entry) => entry.id)
+  if (entryIds.length === 0) return
+
+  const { data: imageData } = await supabase
+    .from('diary_entry_images')
+    .select('entry_id, image_id, images(bucket, path, width, height)')
+    .in('entry_id', entryIds)
+
+  if (!imageData) return
+
+  const countMap = new Map<string, number>()
+  const firstMap = new Map<string, any>()
+  const imagesMap = new Map<string, NonNullable<DiaryEntryWithMood['images']>>()
+
+  for (const row of imageData) {
+    const entryId = row.entry_id
+    countMap.set(entryId, (countMap.get(entryId) ?? 0) + 1)
+    const img = Array.isArray(row.images) ? row.images[0] : row.images
+    if (img?.bucket && img?.path) {
+      if (!firstMap.has(entryId)) firstMap.set(entryId, img)
+      const { data: urlData } = supabase.storage
+        .from(img.bucket)
+        .getPublicUrl(img.path)
+      const list = imagesMap.get(entryId) ?? []
+      list.push({
+        id: row.image_id,
+        uri: urlData.publicUrl,
+        width: img.width ?? undefined,
+        height: img.height ?? undefined,
+      })
+      imagesMap.set(entryId, list)
+    }
+  }
+
+  entries.forEach((entry) => {
+    ;(entry as any).image_count = countMap.get(entry.id) ?? 0
+    entry.images = imagesMap.get(entry.id) ?? []
+    const img = firstMap.get(entry.id)
+    if (img?.bucket && img?.path) {
+      const { data: urlData } = supabase.storage
+        .from(img.bucket)
+        .getPublicUrl(img.path)
+      entry.image_url = urlData.publicUrl
+      entry.image_width = img.width ?? undefined
+      entry.image_height = img.height ?? undefined
+    }
+  })
+}
+
 export const useDiaryStore = create<DiaryState>((set) => ({
   timeline: [],
   isLoading: false,
@@ -80,52 +131,7 @@ export const useDiaryStore = create<DiaryState>((set) => ({
 
     await attachAuthorNames(filtered)
 
-    // 批量查图片数量 + 首张图片 URL
-    const entryIds = filtered.map((e) => e.id)
-    if (entryIds.length > 0) {
-      const { data: imageData } = await supabase
-        .from('diary_entry_images')
-        .select('entry_id, image_id, images(bucket, path, width, height)')
-        .in('entry_id', entryIds)
-
-      if (imageData) {
-        const countMap = new Map<string, number>()
-        const firstMap = new Map<string, any>()
-        const imagesMap = new Map<string, NonNullable<DiaryEntryWithMood['images']>>()
-        for (const row of imageData) {
-          const eid = row.entry_id
-          countMap.set(eid, (countMap.get(eid) ?? 0) + 1)
-          const img = Array.isArray(row.images) ? row.images[0] : row.images
-          if (img?.bucket && img?.path) {
-            if (!firstMap.has(eid)) firstMap.set(eid, img)
-            const { data: urlData } = supabase.storage
-              .from(img.bucket)
-              .getPublicUrl(img.path)
-            const list = imagesMap.get(eid) ?? []
-            list.push({
-              id: row.image_id,
-              uri: urlData.publicUrl,
-              width: img.width ?? undefined,
-              height: img.height ?? undefined,
-            })
-            imagesMap.set(eid, list)
-          }
-        }
-        filtered.forEach((e) => {
-          ;(e as any).image_count = countMap.get(e.id) ?? 0
-          e.images = imagesMap.get(e.id) ?? []
-          const img = firstMap.get(e.id)
-          if (img?.bucket && img?.path) {
-            const { data: urlData } = supabase.storage
-              .from(img.bucket)
-              .getPublicUrl(img.path)
-            e.image_url = urlData.publicUrl
-            e.image_width = img.width ?? undefined
-            e.image_height = img.height ?? undefined
-          }
-        })
-      }
-    }
+    await attachEntryImages(filtered)
 
     set({ timeline: groupByDate(filtered), isLoading: false })
   },
@@ -140,7 +146,23 @@ export const useDiaryStore = create<DiaryState>((set) => ({
     if (error || !data) return null
     const entry = data as unknown as DiaryEntryWithMood
     await attachAuthorNames([entry])
+    await attachEntryImages([entry])
     return entry
+  },
+
+  getDiaryEntries: async (diaryId) => {
+    const { data, error } = await supabase
+      .from('diary_entries')
+      .select('*, mood:mood_id(*)')
+      .eq('diary_id', diaryId)
+      .eq('status', 'published')
+      .order('created_at', { ascending: true })
+
+    if (error || !data) return []
+    const entries = data as unknown as DiaryEntryWithMood[]
+    await attachAuthorNames(entries)
+    await attachEntryImages(entries)
+    return entries
   },
 
   createEntry: async (coupleId, userId, content, moodId, milestoneType?) => {

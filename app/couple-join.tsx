@@ -46,9 +46,9 @@ export default function CoupleJoinScreen() {
         ← 返回
       </Text>
 
-      <Text style={styles.title}>输入邀请码</Text>
+      <Text style={styles.title}>加入这本日记</Text>
       <Text style={styles.subtitle}>
-        请对方把邀请码给你，输入后即可加入
+        输入对方给你的 6 位邀请码，确认后就能一起记录。
       </Text>
 
       <View style={styles.inputWrapper}>
