@@ -57,7 +57,12 @@ Page({
       count: 3 - this.data.images.length,
       mediaType: ['image'],
       success: (res) => {
-        const files = res.tempFiles.map((file) => file.tempFilePath)
+        const files = res.tempFiles.map((file) => ({
+          path: file.tempFilePath,
+          width: file.width,
+          height: file.height,
+          size: file.size
+        }))
         this.setData({ images: [...this.data.images, ...files].slice(0, 3) })
       }
     })
@@ -96,7 +101,7 @@ Page({
         diary = await supabase.createDiary(coupleId, today)
       }
 
-      await supabase.createEntry({
+      const entry = await supabase.createEntry({
         diary_id: diary.id,
         user_id: user.id,
         mood_id: this.data.moodId || null,
@@ -106,7 +111,13 @@ Page({
       })
 
       if (this.data.images.length > 0) {
-        this.setData({ savingMessage: '照片上传会在下一版接入...' })
+        for (let i = 0; i < this.data.images.length; i += 1) {
+          this.setData({ savingMessage: `正在保存照片 ${i + 1}/${this.data.images.length}...` })
+          const image = await supabase.uploadDiaryImage(this.data.images[i], user.id)
+          if (image?.id) {
+            await supabase.linkEntryImage(entry.id, image.id)
+          }
+        }
       }
 
       this.setData({ savingMessage: '正在更新日记...' })

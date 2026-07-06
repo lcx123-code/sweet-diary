@@ -86,8 +86,11 @@ The app expects the Supabase schema in `supabase/migrations` to be applied. The 
 - `moods`
 - `images`
 - `diary_entry_images`
+- `wechat_identities`
 
 Local Supabase metadata under `supabase/.temp/` is intentionally ignored.
+
+The WeChat Mini Program login flow uses the `supabase/functions/wechat-login` Edge Function. It exchanges `wx.login()` codes for WeChat `openid`, maps that `openid` to a Supabase auth user, and returns a Supabase-compatible JWT for Mini Program REST requests.
 
 ## Roadmap
 

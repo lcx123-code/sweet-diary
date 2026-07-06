@@ -34,6 +34,13 @@ function signIn(email, password) {
   })
 }
 
+function signInWithWechatCode(code) {
+  return request('/functions/v1/wechat-login', {
+    method: 'POST',
+    data: { code }
+  })
+}
+
 function signOut() {
   wx.removeStorageSync('sb_access_token')
   wx.removeStorageSync('sb_user')
@@ -97,11 +104,91 @@ function createEntry(payload) {
   }).then((rows) => rows?.[0] || null)
 }
 
+function uploadDiaryImage(file, userId) {
+  const token = wx.getStorageSync('sb_access_token') || SUPABASE_ANON_KEY
+  const ext = inferExt(file.path || file.tempFilePath)
+  const storagePath = `${userId}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`
+
+  return new Promise((resolve, reject) => {
+    wx.uploadFile({
+      url: `${SUPABASE_URL}/storage/v1/object/diary-images/${storagePath}`,
+      filePath: file.path || file.tempFilePath,
+      name: 'file',
+      header: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${token}`,
+        'x-upsert': 'false'
+      },
+      success: async (res) => {
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          reject(new Error(parseUploadError(res.data) || `照片上传失败 ${res.statusCode}`))
+          return
+        }
+
+        try {
+          const image = await insertImage({
+            user_id: userId,
+            bucket: 'diary-images',
+            path: storagePath,
+            width: file.width || null,
+            height: file.height || null
+          })
+          resolve(image)
+        } catch (error) {
+          reject(error)
+        }
+      },
+      fail: reject
+    })
+  })
+}
+
+function insertImage(payload) {
+  return request('/rest/v1/images', {
+    method: 'POST',
+    data: payload
+  }).then((rows) => rows?.[0] || null)
+}
+
+function linkEntryImage(entryId, imageId) {
+  return request('/rest/v1/diary_entry_images', {
+    method: 'POST',
+    data: {
+      entry_id: entryId,
+      image_id: imageId,
+      media_id: uuid()
+    }
+  })
+}
+
+function inferExt(path = '') {
+  const clean = path.split('?')[0]
+  const ext = clean.includes('.') ? clean.split('.').pop().toLowerCase() : 'jpg'
+  return ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext) ? ext : 'jpg'
+}
+
+function parseUploadError(value) {
+  try {
+    const data = JSON.parse(value)
+    return data.message || data.error
+  } catch {
+    return value
+  }
+}
+
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+    const random = Math.random() * 16 | 0
+    return (char === 'x' ? random : (random & 0x3 | 0x8)).toString(16)
+  })
+}
+
 module.exports = {
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
   request,
   signIn,
+  signInWithWechatCode,
   signOut,
   getPublicImageUrl,
   getProfile,
@@ -114,5 +201,7 @@ module.exports = {
   getEntryImages,
   findDiary,
   createDiary,
-  createEntry
+  createEntry,
+  uploadDiaryImage,
+  linkEntryImage
 }

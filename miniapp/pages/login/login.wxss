@@ -9,10 +9,30 @@
 }
 
 .subtitle {
-  margin: 20rpx 0 72rpx;
+  margin: 20rpx 0 56rpx;
   color: #7C756D;
   text-align: center;
   font-size: 32rpx;
+}
+
+.wechat-button {
+  width: 100%;
+  min-height: 92rpx;
+  margin-bottom: 24rpx;
+  border-radius: 999rpx;
+  background: #A8B8A5;
+  color: #FFFFFF;
+  text-align: center;
+  line-height: 92rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.or-line {
+  margin: 24rpx 0;
+  color: #A39D96;
+  text-align: center;
+  font-size: 24rpx;
 }
 
 .input-box {

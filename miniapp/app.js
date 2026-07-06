@@ -64,6 +64,17 @@ App({
     return session
   },
 
+  async signInWithWechat() {
+    const loginRes = await wxLogin()
+    const session = await supabase.signInWithWechatCode(loginRes.code)
+    wx.setStorageSync('sb_access_token', session.access_token)
+    wx.setStorageSync('sb_user', session.user)
+    this.globalData.session = session
+    this.globalData.user = session.user
+    await this.loadCurrentUserData()
+    return session
+  },
+
   signOut() {
     supabase.signOut()
     this.globalData.session = null
@@ -145,4 +156,16 @@ function daysSince(value) {
   const start = new Date(value)
   const now = new Date()
   return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+}
+
+function wxLogin() {
+  return new Promise((resolve, reject) => {
+    wx.login({
+      success: (res) => {
+        if (res.code) resolve(res)
+        else reject(new Error('微信登录失败'))
+      },
+      fail: reject
+    })
+  })
 }

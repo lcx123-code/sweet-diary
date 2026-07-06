@@ -16,7 +16,7 @@
 
   <view wx:if="{{images.length > 0}}" class="image-row">
     <view wx:for="{{images}}" wx:key="*this" class="image-item">
-      <image src="{{item}}" mode="aspectFill" />
+      <image src="{{item.path}}" mode="aspectFill" />
       <text class="remove" data-index="{{index}}" bindtap="removeImage">×</text>
     </view>
   </view>

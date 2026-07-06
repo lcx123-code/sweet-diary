@@ -2,6 +2,9 @@
   <view class="brand serif">Sweet Diary</view>
   <view class="subtitle">两个人共同写的一本生活日记</view>
 
+  <view class="wechat-button" bindtap="loginWithWechat">{{loading ? '登录中...' : '微信一键登录'}}</view>
+  <view class="or-line">或使用邮箱登录</view>
+
   <view class="input-box">
     <input placeholder="邮箱" placeholder-class="placeholder" bindinput="onEmail" />
   </view>
