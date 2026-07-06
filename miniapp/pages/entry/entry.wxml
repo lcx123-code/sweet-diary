@@ -1,0 +1,24 @@
+<view class="page">
+  <view class="back" bindtap="goBack">返回</view>
+  <view class="date serif">{{date}}</view>
+  <view class="hint">{{entries.length > 1 ? '这一天写了 ' + entries.length + ' 段' : '这一天的一段记录'}}</view>
+
+  <block wx:for="{{entries}}" wx:key="id">
+    <view class="entry-block">
+      <view class="author-row">
+        <view class="author-dot">{{item.author[0]}}</view>
+        <view class="author-name">{{item.author}}</view>
+        <view class="time">· 今天</view>
+        <view class="mood">{{item.mood}}</view>
+      </view>
+
+      <view class="body-text">{{item.content}}</view>
+
+      <view wx:if="{{item.images.length > 0}}" class="collage collage-{{item.images.length > 4 ? 4 : item.images.length}}">
+        <image wx:for="{{item.images}}" wx:for-item="img" wx:key="*this" src="{{img}}" mode="aspectFill" />
+      </view>
+
+      <view wx:if="{{item.type !== '普通记录'}}" class="pill">{{item.type}}</view>
+    </view>
+  </block>
+</view>

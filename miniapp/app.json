@@ -1,0 +1,38 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/write/write",
+    "pages/timeline/timeline",
+    "pages/entry/entry",
+    "pages/join/join",
+    "pages/login/login"
+  ],
+  "window": {
+    "navigationBarTitleText": "Sweet Diary",
+    "navigationBarBackgroundColor": "#FAF8F5",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FAF8F5",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#A39D96",
+    "selectedColor": "#A8B8A5",
+    "backgroundColor": "#FAF8F5",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "今天"
+      },
+      {
+        "pagePath": "pages/write/write",
+        "text": "写"
+      },
+      {
+        "pagePath": "pages/timeline/timeline",
+        "text": "回忆"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}

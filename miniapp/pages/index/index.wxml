@@ -1,0 +1,36 @@
+<view class="page home-page">
+  <view class="cover">
+    <view class="names serif">{{userName}} &amp; {{partnerName}}</view>
+    <view class="days serif"><text>{{daysTogether}}</text> 天</view>
+    <view class="subtitle">一起写下的日子</view>
+  </view>
+
+  <view class="today-panel">
+    <view>
+      <view class="section-label">今天</view>
+      <view class="today-title serif">{{todayCount > 0 ? '已经记录 ' + todayCount + ' 条' : '还没有记录'}}</view>
+      <view class="today-preview">{{todayPreview}}</view>
+    </view>
+    <view class="primary-button" bindtap="goWrite">写一点</view>
+  </view>
+
+  <view class="recent-head">
+    <view class="section-label">最近</view>
+    <view class="caption">像翻一本慢慢变厚的日记</view>
+  </view>
+
+  <block wx:for="{{entries}}" wx:key="id">
+    <view class="memory-card" data-id="{{item.id}}" bindtap="goEntry">
+      <view wx:if="{{item.images.length > 0}}" class="collage collage-{{item.images.length > 4 ? 4 : item.images.length}}">
+        <image wx:for="{{item.images}}" wx:for-item="img" wx:key="*this" src="{{img}}" mode="aspectFill" />
+      </view>
+      <view class="memory-meta">
+        <text>{{item.date}}</text>
+        <text wx:if="{{item.mood}}">{{item.mood}}</text>
+        <text class="author">○ {{item.author}}</text>
+      </view>
+      <view wx:if="{{item.type !== '普通记录'}}" class="pill">{{item.type}}</view>
+      <view class="body-text memory-text">{{item.content}}</view>
+    </view>
+  </block>
+</view>

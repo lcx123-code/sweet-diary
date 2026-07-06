@@ -1,0 +1,143 @@
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 40rpx;
+}
+
+.back {
+  color: #A8B8A5;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.date {
+  margin-bottom: 32rpx;
+  font-size: 76rpx;
+}
+
+.editor {
+  width: 100%;
+  min-height: 360rpx;
+  box-sizing: border-box;
+  padding: 24rpx 0;
+  color: #2B2B2B;
+  font-size: 34rpx;
+  line-height: 1.7;
+}
+
+.placeholder {
+  color: #A39D96;
+}
+
+.image-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+}
+
+.image-item {
+  position: relative;
+}
+
+.image-item image {
+  width: 180rpx;
+  height: 140rpx;
+  border-radius: 28rpx;
+}
+
+.remove {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #D14646;
+  text-align: center;
+  line-height: 38rpx;
+  font-size: 34rpx;
+}
+
+.type-toggle {
+  display: flex;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-top: 1rpx solid #E8E4DE;
+  border-bottom: 1rpx solid #E8E4DE;
+}
+
+.type-value {
+  color: #A8B8A5;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.type-row,
+.mood-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.type-pill {
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  background: #F2EEE8;
+  color: #7C756D;
+  font-size: 24rpx;
+}
+
+.type-pill.active {
+  background: #E5EDE2;
+  color: #A8B8A5;
+  font-weight: 600;
+}
+
+.mood {
+  padding: 8rpx 12rpx;
+  opacity: 0.55;
+  font-size: 48rpx;
+}
+
+.mood-active {
+  opacity: 1;
+  border-bottom: 4rpx solid #A8B8A5;
+}
+
+.saving {
+  margin-top: 24rpx;
+  color: #A39D96;
+  font-size: 24rpx;
+}
+
+.bottom-tools {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 24rpx;
+  padding: 24rpx 40rpx 48rpx;
+  border-top: 1rpx solid #E8E4DE;
+  background: #FAF8F5;
+}
+
+.tool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  border: 1rpx solid #E8E4DE;
+  border-radius: 28rpx;
+  background: #FFFFFF;
+  font-size: 40rpx;
+}
+
+.tool.selected {
+  background: #E5EDE2;
+  border-color: #A8B8A5;
+}

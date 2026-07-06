@@ -1,0 +1,107 @@
+.title {
+  margin-bottom: 12rpx;
+  font-size: 76rpx;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-bottom: 56rpx;
+  color: #7C756D;
+  font-size: 32rpx;
+}
+
+.year {
+  margin: 44rpx 0 28rpx;
+  font-size: 76rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+}
+
+.month {
+  margin: 0 0 20rpx 24rpx;
+  color: #7C756D;
+  font-size: 44rpx;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 18rpx 16rpx;
+}
+
+.row.milestone {
+  border-radius: 16rpx;
+  background: #E5EDE2;
+}
+
+.dot {
+  width: 10rpx;
+  height: 10rpx;
+  margin-top: 16rpx;
+  border-radius: 50%;
+  background: #E8E4DE;
+}
+
+.dot-on {
+  width: 16rpx;
+  height: 16rpx;
+  background: #A8B8A5;
+}
+
+.day {
+  width: 44rpx;
+  margin-top: -4rpx;
+  text-align: center;
+  font-size: 34rpx;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview {
+  overflow: hidden;
+  color: #2B2B2B;
+  font-size: 32rpx;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag {
+  margin-top: 6rpx;
+  color: #A8B8A5;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.row image {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 14rpx;
+}
+
+.mood {
+  font-size: 32rpx;
+  line-height: 40rpx;
+}
+
+.author {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: #E5EDE2;
+  color: #A8B8A5;
+  text-align: center;
+  line-height: 36rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.divider {
+  height: 1rpx;
+  margin: 24rpx 0 40rpx 88rpx;
+  background: #E8E4DE;
+}

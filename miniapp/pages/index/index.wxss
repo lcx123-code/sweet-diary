@@ -1,0 +1,74 @@
+.cover {
+  margin-bottom: 56rpx;
+}
+
+.names {
+  margin-bottom: 18rpx;
+  font-size: 48rpx;
+  color: #2B2B2B;
+}
+
+.days {
+  color: #2B2B2B;
+  font-size: 72rpx;
+  line-height: 1.1;
+}
+
+.days text {
+  color: #A8B8A5;
+  font-size: 96rpx;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-top: 16rpx;
+  color: #7C756D;
+  font-size: 32rpx;
+}
+
+.today-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+  margin-bottom: 48rpx;
+  padding: 40rpx 0;
+  border-top: 1rpx solid #E8E4DE;
+  border-bottom: 1rpx solid #E8E4DE;
+}
+
+.today-title {
+  margin-bottom: 18rpx;
+  font-size: 44rpx;
+}
+
+.today-preview {
+  color: #7C756D;
+  font-size: 32rpx;
+  line-height: 1.6;
+}
+
+.recent-head {
+  margin-bottom: 32rpx;
+}
+
+.memory-card {
+  margin-bottom: 64rpx;
+}
+
+.memory-meta {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin: 18rpx 0;
+  color: #7C756D;
+  font-size: 26rpx;
+}
+
+.memory-meta .author {
+  margin-left: auto;
+  color: #A39D96;
+}
+
+.memory-text {
+  margin-top: 18rpx;
+}

@@ -1,0 +1,55 @@
+.back {
+  margin-bottom: 48rpx;
+  color: #7C756D;
+  font-size: 32rpx;
+}
+
+.date {
+  margin-bottom: 10rpx;
+  font-size: 76rpx;
+}
+
+.hint {
+  margin-bottom: 48rpx;
+  color: #A39D96;
+  font-size: 24rpx;
+}
+
+.entry-block {
+  margin-bottom: 56rpx;
+}
+
+.author-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 28rpx;
+}
+
+.author-dot {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #E5EDE2;
+  color: #A8B8A5;
+  text-align: center;
+  line-height: 44rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+.author-name,
+.time {
+  color: #7C756D;
+  font-size: 24rpx;
+}
+
+.mood {
+  margin-left: auto;
+  font-size: 34rpx;
+}
+
+.collage {
+  margin-top: 32rpx;
+  margin-bottom: 24rpx;
+}

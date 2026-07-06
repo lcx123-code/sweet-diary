@@ -1,0 +1,14 @@
+<view class="page login-page">
+  <view class="brand serif">Sweet Diary</view>
+  <view class="subtitle">两个人共同写的一本生活日记</view>
+
+  <view class="input-box">
+    <input placeholder="邮箱" placeholder-class="placeholder" bindinput="onEmail" />
+  </view>
+  <view class="input-box">
+    <input password placeholder="密码" placeholder-class="placeholder" bindinput="onPassword" />
+  </view>
+
+  <view class="primary-button login-button" bindtap="login">登录</view>
+  <view class="join-link" bindtap="goJoin">输入邀请码</view>
+</view>

@@ -1,0 +1,17 @@
+<view class="page join-page">
+  <view class="back" bindtap="goBack">返回</view>
+  <view class="title serif">加入这本日记</view>
+  <view class="subtitle">输入对方给你的 6 位邀请码，确认后就能一起记录。</view>
+
+  <view class="code-box">
+    <input
+      value="{{code}}"
+      maxlength="6"
+      placeholder="6 位邀请码"
+      placeholder-class="placeholder"
+      bindinput="onInput"
+    />
+  </view>
+
+  <view class="primary-button" bindtap="join">加入</view>
+</view>
