@@ -47,6 +47,7 @@ export default function WriteScreen() {
   const selectMood = useMoodStore((s) => s.selectMood)
   const fetchMoods = useMoodStore((s) => s.fetchMoods)
   const createEntry = useDiaryStore((s) => s.createEntry)
+  const fetchTimeline = useDiaryStore((s) => s.fetchTimeline)
 
   useEffect(() => {
     fetchMoods()
@@ -154,6 +155,7 @@ export default function WriteScreen() {
       }
     }
 
+    await fetchTimeline(coupleId)
     setSaving(false)
     router.back()
   }

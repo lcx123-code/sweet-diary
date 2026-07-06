@@ -78,16 +78,29 @@ export const useDiaryStore = create<DiaryState>((set) => ({
       if (imageData) {
         const countMap = new Map<string, number>()
         const firstMap = new Map<string, any>()
+        const imagesMap = new Map<string, NonNullable<DiaryEntryWithMood['images']>>()
         for (const row of imageData) {
           const eid = row.entry_id
           countMap.set(eid, (countMap.get(eid) ?? 0) + 1)
-          if (!firstMap.has(eid)) {
-            const img = Array.isArray(row.images) ? row.images[0] : row.images
-            if (img) firstMap.set(eid, img)
+          const img = Array.isArray(row.images) ? row.images[0] : row.images
+          if (img?.bucket && img?.path) {
+            if (!firstMap.has(eid)) firstMap.set(eid, img)
+            const { data: urlData } = supabase.storage
+              .from(img.bucket)
+              .getPublicUrl(img.path)
+            const list = imagesMap.get(eid) ?? []
+            list.push({
+              id: row.image_id,
+              uri: urlData.publicUrl,
+              width: img.width ?? undefined,
+              height: img.height ?? undefined,
+            })
+            imagesMap.set(eid, list)
           }
         }
         filtered.forEach((e) => {
           ;(e as any).image_count = countMap.get(e.id) ?? 0
+          e.images = imagesMap.get(e.id) ?? []
           const img = firstMap.get(e.id)
           if (img?.bucket && img?.path) {
             const { data: urlData } = supabase.storage

@@ -116,6 +116,7 @@ export interface PeriodLog {
 export interface DiaryEntryWithMood extends DiaryEntry {
   mood?: Mood | null
   author_name?: string
+  images?: { id: string; uri: string; width?: number; height?: number }[]
   image_url?: string
   image_width?: number
   image_height?: number

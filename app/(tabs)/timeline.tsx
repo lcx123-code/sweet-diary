@@ -111,6 +111,10 @@ export default function TimelineScreen() {
                           <Image source={{ uri: entry.image_url }} style={styles.entryThumb} />
                         )}
 
+                        {entry.mood && (
+                          <Text style={styles.entryMood}>{entry.mood.emoji}</Text>
+                        )}
+
                         <Text style={styles.entryAuthor}>
                           {entry.author_name?.charAt(0) ?? '?'}
                         </Text>
@@ -315,6 +319,11 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 8,
     marginTop: 2,
+  },
+  entryMood: {
+    fontSize: 18,
+    lineHeight: 22,
+    marginTop: 1,
   },
   monthDivider: {
     height: StyleSheet.hairlineWidth,

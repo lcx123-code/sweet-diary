@@ -1,11 +1,10 @@
 import React from 'react'
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { router } from 'expo-router'
 import Animated, { FadeInDown } from 'react-native-reanimated'
-import { colors, spacing, fontSizes, fonts, lineHeights, radii } from '../theme'
+import { ImageCollage } from './ImageCollage'
+import { colors, spacing, fontSizes, fonts, lineHeights } from '../theme'
 import type { DiaryEntryWithMood } from '../lib/supabase-types'
-
-const SCREEN_WIDTH = Dimensions.get('window').width
 
 interface MemoryCardProps {
   entry: DiaryEntryWithMood
@@ -22,8 +21,12 @@ interface MemoryCardProps {
  */
 export function MemoryCard({ entry, index = 0 }: MemoryCardProps) {
   const isMilestone = !!entry.milestone_type
-  const hasImage = !!entry.image_url
-  const layout = isMilestone ? 'hero' : hasImage ? (entry.image_width ? 'split' : 'hero') : 'text'
+  const images = entry.images?.length
+    ? entry.images
+    : entry.image_url
+      ? [{ id: entry.id, uri: entry.image_url, width: entry.image_width, height: entry.image_height }]
+      : []
+  const hasImage = images.length > 0
 
   const time = new Date(entry.created_at).toLocaleDateString('zh-CN', {
     month: 'short',
@@ -43,26 +46,15 @@ export function MemoryCard({ entry, index = 0 }: MemoryCardProps) {
         onPress={() => router.push(`/entry/${entry.id}`)}
         style={styles.touchable}
       >
-        {layout === 'hero' && (
-          <HeroLayout
+        {hasImage ? (
+          <PhotoLayout
             entry={entry}
-            imageUrl={entry.image_url}
+            images={images}
             time={time}
             authorLetter={authorLetter}
             isMilestone={isMilestone}
           />
-        )}
-
-        {layout === 'split' && (
-          <SplitLayout
-            entry={entry}
-            imageUrl={entry.image_url!}
-            time={time}
-            authorLetter={authorLetter}
-          />
-        )}
-
-        {layout === 'text' && (
+        ) : (
           <TextLayout
             entry={entry}
             time={time}
@@ -76,33 +68,22 @@ export function MemoryCard({ entry, index = 0 }: MemoryCardProps) {
 
 // ─── Hero 模板：全宽大图 ─────────────────────────────
 
-function HeroLayout({
+function PhotoLayout({
   entry,
-  imageUrl,
+  images,
   time,
   authorLetter,
   isMilestone,
 }: {
   entry: DiaryEntryWithMood
-  imageUrl?: string
+  images: NonNullable<DiaryEntryWithMood['images']>
   time: string
   authorLetter: string
   isMilestone: boolean
 }) {
-  const imgWidth = SCREEN_WIDTH - spacing.sm * 2
-  const imgHeight = imgWidth * 0.7
-
   return (
     <View style={isMilestone ? styles.milestoneWrapper : undefined}>
-      {imageUrl ? (
-        <Image
-          source={{ uri: imageUrl }}
-          style={[styles.heroImage, { width: imgWidth, height: imgHeight }]}
-          resizeMode="cover"
-        />
-      ) : (
-        <View style={[styles.heroPlaceholder, { width: imgWidth, height: imgHeight }]} />
-      )}
+      <ImageCollage images={images} style={styles.collage} />
 
       <View style={styles.heroTextArea}>
         {isMilestone && (
@@ -113,6 +94,7 @@ function HeroLayout({
           </View>
         )}
         <Text style={[styles.heroDate]}>{time}</Text>
+        {entry.mood && <Text style={styles.moodEmoji}>{entry.mood.emoji}</Text>}
         <Text style={styles.heroAuthor}>○ {authorLetter}</Text>
       </View>
 
@@ -125,43 +107,6 @@ function HeroLayout({
       {isMilestone && (
         <View style={styles.milestoneDivider} />
       )}
-    </View>
-  )
-}
-
-// ─── Split 模板：左图右文 ────────────────────────────
-
-function SplitLayout({
-  entry,
-  imageUrl,
-  time,
-  authorLetter,
-}: {
-  entry: DiaryEntryWithMood
-  imageUrl: string
-  time: string
-  authorLetter: string
-}) {
-  const totalWidth = SCREEN_WIDTH - spacing.sm * 2
-  const imgWidth = totalWidth * 0.55
-  const imgHeight = imgWidth * 0.75
-
-  return (
-    <View style={styles.splitRow}>
-      <Image
-        source={{ uri: imageUrl }}
-        style={[styles.splitImage, { width: imgWidth, height: imgHeight }]}
-        resizeMode="cover"
-      />
-      <View style={styles.splitTextArea}>
-        <Text style={styles.splitDate}>{time}</Text>
-        <Text style={styles.splitAuthor}>○ {authorLetter}</Text>
-        {entry.content && (
-          <Text style={styles.splitExcerpt} numberOfLines={5}>
-            {entry.content}
-          </Text>
-        )}
-      </View>
     </View>
   )
 }
@@ -179,8 +124,11 @@ function TextLayout({
 }) {
   return (
     <View style={styles.textBlock}>
-      <Text style={styles.textAuthor}>○ {authorLetter}</Text>
-      <Text style={styles.textDate}>{time}</Text>
+      <View style={styles.textMetaRow}>
+        <Text style={styles.textAuthor}>○ {authorLetter}</Text>
+        {entry.mood && <Text style={styles.moodEmoji}>{entry.mood.emoji}</Text>}
+        <Text style={styles.textDate}>{time}</Text>
+      </View>
       {entry.content && (
         <Text style={styles.textExcerpt} numberOfLines={4}>
           {entry.content}
@@ -211,15 +159,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   touchable: {},
-  // Hero
-  heroImage: {
-    borderRadius: radii.card,
+  collage: {
     marginBottom: spacing.xs,
-  },
-  heroPlaceholder: {
-    borderRadius: radii.card,
-    marginBottom: spacing.xs,
-    backgroundColor: colors.bgSecondary,
   },
   heroTextArea: {
     flexDirection: 'row',
@@ -235,6 +176,10 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.caption,
     color: colors.textMuted,
     marginLeft: 'auto',
+  },
+  moodEmoji: {
+    fontSize: 16,
+    color: colors.textSecondary,
   },
   heroExcerpt: {
     fontSize: fontSizes.body,
@@ -266,48 +211,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.separator,
     marginTop: spacing.sm,
   },
-  // Split
-  splitRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  splitImage: {
-    borderRadius: radii.card,
-  },
-  splitTextArea: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    gap: spacing.xs - 8,
-  },
-  splitDate: {
-    fontSize: fontSizes.caption,
-    color: colors.textSecondary,
-  },
-  splitAuthor: {
-    fontSize: fontSizes.caption,
-    color: colors.textMuted,
-  },
-  splitExcerpt: {
-    fontSize: fontSizes.body,
-    fontFamily: fonts.sans,
-    color: colors.text,
-    lineHeight: lineHeights.body,
-  },
   // Text
   textBlock: {
     paddingVertical: spacing.xs,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.separator,
   },
+  textMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: spacing.xs,
+  },
   textAuthor: {
     fontSize: fontSizes.caption,
     color: colors.textMuted,
-    marginBottom: 4,
   },
   textDate: {
     fontSize: fontSizes.caption,
     color: colors.textSecondary,
-    marginBottom: spacing.xs,
+    marginLeft: 'auto',
   },
   textExcerpt: {
     fontSize: fontSizes.body,
